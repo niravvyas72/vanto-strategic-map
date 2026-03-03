@@ -496,7 +496,7 @@ function openSM(idx){
   document.getElementById('mBody').innerHTML=renderSHForm();
   document.getElementById('sOverlay').classList.add('open');
 }
-function closeSM(){document.getElementById('sOverlay').classList.remove('open');}
+function closeSM(){document.getElementById('sOverlay').classList.remove('open');render();}
 function saveSH(){if(!tmp.name||!tmp.name.trim()){showToast('Name is required','te');return;}var copy=JSON.parse(JSON.stringify(tmp));if(editIdx!==null&&editIdx>=0)form.stakeholders[editIdx]=copy;else form.stakeholders.push(copy);closeSM();render();}
 
 function renderSHForm(){
@@ -563,8 +563,6 @@ function renderSHForm(){
       '<div class="field" style="margin-top:10px"><label>Alert notes</label><textarea placeholder="Note specific risks or concerns about this person…" oninput="tmp.alertNotes=this.value" style="min-height:50px">' + esc(tmp.alertNotes||'') + '</textarea></div>' +
     '</div>' +
     '<hr class="mdiv">' +
-    '<hr class="mdiv">' +
-    '<div><span class="blk-label">ALERTS FOR THIS STAKEHOLDER</span><div class="alert-grid">'+shAlertHtml+'</div><div class="field" style="margin-top:10px"><label>Alert notes for this person</label><textarea placeholder="Note specific risks or concerns…" oninput="tmp.alertNotes=this.value" style="min-height:50px">'+esc(tmp.alertNotes||'')+'</textarea></div></div>' +
     '<div class="field"><label>WHAT\'S IN IT FOR THIS PERSON? (Personal Win Result)</label><textarea placeholder="What does this person personally gain — career, recognition, avoiding blame…" oninput="tmp.winResult=this.value" style="min-height:60px">'+esc(tmp.winResult)+'</textarea></div>' +
     '<div class="field"><label>WHAT\'S IN IT FOR THEM INSIDE THE COMPANY? (Org Result)</label><textarea placeholder="What business/organisational results do they need to demonstrate?" oninput="tmp.orgResult=this.value" style="min-height:60px">'+esc(tmp.orgResult)+'</textarea></div>' +
     '<div class="field"><label>WHAT\'S MISSING?</label><input type="text" placeholder="What don\'t you yet know or need to get from/about this person?" value="'+esc(tmp.missing)+'" oninput="tmp.missing=this.value"></div>' +
