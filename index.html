@@ -569,7 +569,7 @@ function renderSHForm(){
     '</div>';
 }
 
-function togSHAlertIdx(el,ai){if(!tmp.stakeholderAlerts)tmp.stakeholderAlerts=[];var a=ALERTS[ai];var i=tmp.stakeholderAlerts.indexOf(a);i>=0?tmp.stakeholderAlerts.splice(i,1):tmp.stakeholderAlerts.push(a);document.getElementById('mBody').innerHTML=renderSHForm();}
+function togSHAlertIdx(el,ai){if(!tmp.stakeholderAlerts)tmp.stakeholderAlerts=[];var a=ALERTS[ai];var i=tmp.stakeholderAlerts.indexOf(a);i>=0?tmp.stakeholderAlerts.splice(i,1):tmp.stakeholderAlerts.push(a);var chk=el.querySelector('.chk');if(el.classList.contains('ach')){el.classList.remove('ach');if(chk)chk.textContent='';}else{el.classList.add('ach');if(chk)chk.textContent='✓';}}
 function setTA(c){tmp.attitude=(tmp.attitude===c?'':c);document.getElementById('mBody').innerHTML=renderSHForm();}
 function setTP(v){tmp.partnershipLevel=(tmp.partnershipLevel==v?'':v);document.getElementById('mBody').innerHTML=renderSHForm();}
 function setTT(c){tmp.type=c;document.getElementById('mBody').innerHTML=renderSHForm();}
