@@ -133,7 +133,7 @@ header{background:var(--ink);color:#fff;padding:14px 20px;display:flex;align-ite
 .sh-hdr{background:#f8f8f6;padding:10px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .type-badge{padding:3px 9px;border-radius:6px;font-size:11px;font-weight:600}
 .type-E{background:#e8f4fd;color:#1a6b9e}.type-T{background:#f0e8fd;color:#6b1a9e}
-.type-U{background:#e8fdf0;color:#1a9e4a}.type-G{background:#fdf8e8;color:#9e7a1a}
+.type-P{background:#e8fdf0;color:#1a9e4a}.type-G{background:#fdf8e8;color:#9e7a1a}
 .sh-body{padding:12px 14px;display:grid;gap:10px}
 .blk-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--ink-light);display:block;margin-bottom:7px}
 .legend-strip{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
@@ -182,7 +182,7 @@ header{background:var(--ink);color:#fff;padding:14px 20px;display:flex;align-ite
 @media(max-width:460px){.alert-grid{grid-template-columns:1fr}}
 .alert-item{display:flex;align-items:center;gap:8px;padding:9px 12px;border:1.5px solid var(--rule);border-radius:8px;cursor:pointer;font-size:13px;background:#fff;transition:all .15s;-webkit-user-select:none;user-select:none}
 .alert-item.ach{background:#fef3d8;border-color:var(--warn)}
-.chk{width:18px;height:18px;border:2px solid var(--rule);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.chk{width:18px;height:18px;border:2px solid var(--rule);border-radius:4px;display:flex;align-items:center;justify-content:font-size:11px;flex-shrink:0}
 .alert-item.ach .chk{background:var(--warn);border-color:var(--warn);color:#fff}
 .mb-bar{border:1.5px solid #f5c6c4;border-radius:8px;padding:11px 16px;display:flex;align-items:center;gap:12px;margin-bottom:16px;background:#fff5f5}
 .mb-bar.ok{background:#f0fdf4;border-color:#b8e0c8}
@@ -251,7 +251,8 @@ var INDIA_ADMINS = ["nirav.hiral@gmail.com"];
 // ═══════════════════════════════════
 // LOOKUP TABLES
 // ═══════════════════════════════════
-var ATT=[{v:-4,s:'O/C Opp',l:'Overtly/Covertly Opposed'},{v:-3,s:'H.Res',l:'Highly Resistant'},{v:-2,s:'Subm',l:'Submissive'},{v:-1,s:'Unint',l:'Uninterested'},{v:1,s:'Accpt',l:'Accepting'},{v:2,s:'Agree',l:'In Agreement'},{v:3,s:'Supp',l:'Supportive'},{v:4,s:'Def',l:'Enthusiastic Defender'}];var PART=[{c:'G',l:'Growth',d:'Developing positively — active investment in relationship',col:'#2a7d4f'},{c:'S',l:'Stable',d:'Neutral — no particular issues or growth',col:'#1a6b7a'},{c:'P',l:'Problematic',d:'Active issues or barriers undermining the relationship',col:'#c8382b'},{c:'EC',l:'Excess Confidence',d:'Overconfidence — risk of complacency on either side',col:'#e67e22'}];
+var ATT=[{v:-4,s:'O/C Opp',l:'Overtly/Covertly Opposed'},{v:-3,s:'H.Res',l:'Highly Resistant'},{v:-2,s:'Subm',l:'Submissive'},{v:-1,s:'Unint',l:'Uninterested'},{v:1,s:'Accpt',l:'Accepting'},{v:2,s:'Agree',l:'In Agreement'},{v:3,s:'Supp',l:'Supportive'},{v:4,s:'Def',l:'Enthusiastic Defender'}];
+var PART=[{c:'G',l:'Growth',d:'Developing positively — active investment in relationship',col:'#2a7d4f'},{c:'S',l:'Stable',d:'Neutral — no particular issues or growth',col:'#1a6b7a'},{c:'P',l:'Problematic',d:'Active issues or barriers undermining the relationship',col:'#c8382b'},{c:'EC',l:'Excess Confidence',d:'Overconfidence — risk of complacency on either side',col:'#e67e22'}];
 var ITYPES=[{c:'E',l:'Economic / Financial',d:'Controls budget & final sign-off'},{c:'T',l:'Technical',d:'Evaluates fit, specs, compliance'},{c:'P',l:'Pragmatic',d:'Day-to-day user of the solution'},{c:'G',l:'Guardian Angel',d:'Internal champion on your side'}];
 var GAUGE=['Euphoria','Enthusiasm','Security','Comfort','OK','Concern','Discomfort','Worry','Fear','Panic'];
 var ALERTS=['Lacking Basic Information','Uncertainty about Info','Unidentified Influence','Market Situation / Changes','New People','Reorganisation or Other Circumstances','Excess Confidence (EC)'];
@@ -265,10 +266,8 @@ var view='loading', activeId=null, form={}, tmp={}, editIdx=null;
 var chFilter='all', syncing=false;
 
 // ═══════════════════════════════════
-// BOOT — PKCE authorization code flow (works in all browsers, no SDK)
+// BOOT — PKCE authorization code flow
 // ═══════════════════════════════════
-
-// PKCE helpers
 function base64url(buf) {
   return btoa(String.fromCharCode.apply(null, new Uint8Array(buf)))
     .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
@@ -295,12 +294,11 @@ function parseQuery(str) {
 }
 
 window.addEventListener('load', function() {
-  // Check if returning from OAuth with ?code=...
   var params = parseQuery(location.search);
   if (params.code && params.state) {
     var savedState    = sessionStorage.getItem('vsm_state');
     var savedVerifier = sessionStorage.getItem('vsm_verifier');
-    history.replaceState(null, '', location.pathname); // clean URL
+    history.replaceState(null, '', location.pathname);
     if (params.state !== savedState || !savedVerifier) {
       showToast('Auth state mismatch — try again', 'te');
       showAuthScreen();
@@ -310,8 +308,6 @@ window.addEventListener('load', function() {
     exchangeCode(params.code, savedVerifier);
     return;
   }
-
-  // Resume from session
   var tok = sessionStorage.getItem('vsm_tok');
   var usr = sessionStorage.getItem('vsm_usr');
   if (tok && usr) {
@@ -328,13 +324,12 @@ window.addEventListener('load', function() {
     fetchUserInfo().then(finishAuth).catch(function() { sessionStorage.clear(); showAuthScreen(); });
     return;
   }
-
   showAuthScreen();
 });
 
 function signIn() {
   var verifier = genVerifier();
-  var state    = genVerifier(); // random state for CSRF protection
+  var state    = genVerifier();
   sessionStorage.setItem('vsm_verifier', verifier);
   sessionStorage.setItem('vsm_state',    state);
   genChallenge(verifier).then(function(challenge) {
@@ -360,7 +355,6 @@ function exchangeCode(code, verifier) {
     body: JSON.stringify({code: code, code_verifier: verifier, redirect_uri: REDIRECT})
   }).then(function(r) { return r.json(); }).then(function(data) {
     if (!data.access_token) {
-      console.error('Token exchange failed', data);
       showToast('Sign-in failed: ' + (data.error_description || data.error || 'unknown'), 'te');
       showAuthScreen();
       return;
@@ -370,10 +364,9 @@ function exchangeCode(code, verifier) {
     sessionStorage.removeItem('vsm_verifier');
     sessionStorage.removeItem('vsm_state');
     fetchUserInfo().then(finishAuth).catch(function(e) {
-      console.error(e); sessionStorage.clear(); showAuthScreen();
+      sessionStorage.clear(); showAuthScreen();
     });
   }).catch(function(e) {
-    console.error('exchangeCode error', e);
     showToast('Sign-in failed — check connection', 'te');
     showAuthScreen();
   });
@@ -457,7 +450,7 @@ function setSyncing(v) {
 }
 
 // ═══════════════════════════════════
-// DRIVE — pure fetch, no SDK
+// DRIVE
 // ═══════════════════════════════════
 function dGet(path, params) {
   var url = 'https://www.googleapis.com/drive/v3/' + path;
@@ -512,7 +505,6 @@ function loadAllMaps() {
       return dCreate(INDEX_FILE, {fileMap:{},version:1}).then(function(id){ indexFileId=id; });
     }
   }).catch(function(e) {
-    console.error('loadAllMaps',e);
     showToast('Could not load from Drive','te');
     maps = [];
   });
@@ -526,7 +518,7 @@ function saveMapToDrive(m) {
     return dWrite(indexFileId, {fileMap:driveIndex,version:1});
   });
   return p.then(function(){ showToast('Saved to Google Drive ✓','ts'); })
-    .catch(function(e){ console.error(e); showToast('Sync failed','tw'); })
+    .catch(function(e){ showToast('Sync failed','tw'); })
     .then(function(){ setSyncing(false); });
 }
 
@@ -537,7 +529,7 @@ function deleteMapFromDrive(mapId) {
   return dDelete(fid).then(function(){
     delete driveIndex[mapId];
     return dWrite(indexFileId, {fileMap:driveIndex,version:1});
-  }).catch(function(e){ console.error(e); }).then(function(){ setSyncing(false); });
+  }).catch(function(e){}).then(function(){ setSyncing(false); });
 }
 
 // ═══════════════════════════════════
@@ -587,7 +579,7 @@ function renderForm(){
   var actHtml=(m.actions||[]).map(function(a,i){return '<div class="act-row"><div class="act-num">'+(i+1)+'</div><div class="act-fields"><div class="field"><input type="text" placeholder="Describe the strategic action…" value="'+esc(a.text)+'" oninput="form.actions['+i+'].text=this.value"></div><div class="act-meta"><div class="field"><input type="text" placeholder="Responsible person" value="'+esc(a.who)+'" oninput="form.actions['+i+'].who=this.value"></div><div class="field"><input type="date" value="'+esc(a.when)+'" oninput="form.actions['+i+'].when=this.value"></div></div></div><button class="del-btn" onclick="remAction('+i+')">🗑</button></div>';}).join('');
   var gaugeHtml=GAUGE.map(function(l,i){return '<button class="g-btn g'+(i+1)+(m.readiness===i?' gsel':'')+'" onclick="setReadiness('+i+')">'+l+'</button>';}).join('');
   var alertHtml=ALERTS.map(function(a){var on=m.alerts&&m.alerts.indexOf(a)!==-1; return '<div class="alert-item'+(on?' ach':'')+'" onclick="togAlert(\''+esc(a)+'\')"><div class="chk">'+(on?'✓':'')+'</div><span>'+esc(a)+'</span></div>';}).join('');
-  return '<div class="bc"><a onclick="showView(\'list\')">My Maps</a><span class="sep">›</span><span class="cur">New Strategic Map</span></div>'+misBar+'<div class="outcome-box">'+'<div style="font-family:\'DM Serif Display\',serif;font-size:21px;color:#fff;opacity:.9;margin-bottom:16px">Deal Overview</div>'+'<div class="field-row"><div class="field"><label>CLIENT / PROSPECT <span class="req">*</span></label><input type="text" placeholder="Company name" value="'+esc(m.client)+'" oninput="form.client=this.value"></div><div class="field"><label>DEAL TITLE / OPPORTUNITY</label><input type="text" placeholder="Short description" value="'+esc(m.title)+'" oninput="form.title=this.value"></div></div>'+'<div class="field-row"><div class="field"><label>PERSON ACCOUNTABLE FOR OUTCOME <span class="req">*</span></label><input type="text" placeholder="Name + role at Vanto Group" value="'+esc(m.accountable)+'" oninput="form.accountable=this.value"></div><div class="field"><label>WILL CAUSE CLOSING BY</label><input type="date" value="'+esc(m.byWhen)+'" oninput="form.byWhen=this.value">'+(m.byWhen?'<div class="hint" style="color:rgba(255,255,255,.5)">'+fmtDate(m.byWhen)+'</div>':'')+'</div></div>'+'<div class="field" style="margin-bottom:14px"><label>IDENTIFIED URGENT CASE FOR ACTION</label><textarea placeholder="Describe the prospect\'s business situation that created an urgent need for Vanto\'s work — what is happening in their business, what pressure or opportunity is driving this, and why it cannot wait…" oninput="form.urgentCase=this.value" style="min-height:110px">'+esc(m.urgentCase||'')+'</textarea><div class="hint">The business reality on their side that makes this deal time-sensitive</div></div>'+'<div class="field"><label>SPECIFIC OUTCOME <span class="req">*</span></label><textarea placeholder="Action verb + Measurable Output + Timeframe…" oninput="form.outcome=this.value">'+esc(m.outcome)+'</textarea><div class="hint">Format: Action verb + Measurable Output + Timeframe</div></div>'+'</div>'+'<div class="form-card"><div class="sec-hdr"><h2>Prospect Stakeholders</h2><span class="badge">'+( m.stakeholders||[]).length+' added</span></div><div class="sec-body"><p class="text-muted" style="margin-bottom:12px">Map every person who influences this deal.</p><div class="sh-list">'+shCards+'</div><button class="add-btn" onclick="openSM()"><span style="font-size:18px">+</span> Add Stakeholder</button></div></div>'+'<div class="form-card"><div class="sec-hdr"><h2>Strategic Actions</h2><span class="badge">'+( m.actions||[]).length+' action'+((m.actions||[]).length!==1?'s':'')+'</span></div><div class="sec-body"><p class="text-muted" style="margin-bottom:12px">Prioritised actions to advance this deal.</p><div class="act-list">'+actHtml+'</div><button class="add-btn" onclick="addAction()"><span style="font-size:18px">+</span> Add Action</button></div></div>'+'<div class="form-card"><div class="sec-hdr"><h2>Alerts</h2>'+(m.alerts&&m.alerts.length?'<span class="badge">'+m.alerts.length+' active</span>':'')+' </div><div class="sec-body"><p class="text-muted" style="margin-bottom:12px">Flag conditions that could jeopardise this deal.</p><div class="alert-grid">'+alertHtml+'</div></div></div>'+'<div class="gauge-sec"><h3>Your Readiness Level</h3><div class="gauge-sub">How do you honestly feel about this deal right now?</div><div class="gauge-scale">'+gaugeHtml+'</div></div>'+'<div class="form-footer"><button class="btn btn-outline" onclick="showView(\'list\')">Cancel</button><button class="btn btn-primary" onclick="doSaveMap()">💾 Save to Drive</button></div>';
+  return '<div class="bc"><a onclick="showView(\'list\')">My Maps</a><span class="sep">›</span><span class="cur">New Strategic Map</span></div>'+misBar+'<div class="outcome-box">'+'<div style="font-family:\'DM Serif Display\',serif;font-size:21px;color:#fff;opacity:.9;margin-bottom:16px">Deal Overview</div>'+'<div class="field-row"><div class="field"><label>CLIENT / PROSPECT <span class="req">*</span></label><input type="text" placeholder="Company name" value="'+esc(m.client)+'" oninput="form.client=this.value"></div><div class="field"><label>DEAL TITLE / OPPORTUNITY</label><input type="text" placeholder="Short description" value="'+esc(m.title)+'" oninput="form.title=this.value"></div></div>'+'<div class="field-row"><div class="field"><label>PERSON ACCOUNTABLE FOR OUTCOME <span class="req">*</span></label><input type="text" placeholder="Name + role at Vanto Group" value="'+esc(m.accountable)+'" oninput="form.accountable=this.value"></div><div class="field"><label>WILL CAUSE CLOSING BY</label><input type="date" value="'+esc(m.byWhen)+'" oninput="form.byWhen=this.value">'+(m.byWhen?'<div class="hint" style="color:rgba(255,255,255,.5)">'+fmtDate(m.byWhen)+'</div>':'')+'</div></div>'+'<div class="field" style="margin-bottom:14px"><label>IDENTIFIED URGENT CASE FOR ACTION</label><textarea placeholder="Describe the prospect\'s business situation that created an urgent need for Vanto\'s work…" oninput="form.urgentCase=this.value" style="min-height:110px">'+esc(m.urgentCase||'')+'</textarea><div class="hint">The business reality on their side that makes this deal time-sensitive</div></div>'+'<div class="field"><label>SPECIFIC OUTCOME <span class="req">*</span></label><textarea placeholder="Action verb + Measurable Output + Timeframe…" oninput="form.outcome=this.value">'+esc(m.outcome)+'</textarea><div class="hint">Format: Action verb + Measurable Output + Timeframe</div></div>'+'</div>'+'<div class="form-card"><div class="sec-hdr"><h2>Prospect Stakeholders</h2><span class="badge">'+( m.stakeholders||[]).length+' added</span></div><div class="sec-body"><p class="text-muted" style="margin-bottom:12px">Map every person who influences this deal.</p><div class="sh-list">'+shCards+'</div><button class="add-btn" onclick="openSM()"><span style="font-size:18px">+</span> Add Stakeholder</button></div></div>'+'<div class="form-card"><div class="sec-hdr"><h2>Strategic Actions</h2><span class="badge">'+( m.actions||[]).length+' action'+((m.actions||[]).length!==1?'s':'')+'</span></div><div class="sec-body"><p class="text-muted" style="margin-bottom:12px">Prioritised actions to advance this deal.</p><div class="act-list">'+actHtml+'</div><button class="add-btn" onclick="addAction()"><span style="font-size:18px">+</span> Add Action</button></div></div>'+'<div class="form-card"><div class="sec-hdr"><h2>Alerts</h2>'+(m.alerts&&m.alerts.length?'<span class="badge">'+m.alerts.length+' active</span>':'')+' </div><div class="sec-body"><p class="text-muted" style="margin-bottom:12px">Flag conditions that could jeopardise this deal.</p><div class="alert-grid">'+alertHtml+'</div></div></div>'+'<div class="gauge-sec"><h3>Your Readiness Level</h3><div class="gauge-sub">How do you honestly feel about this deal right now?</div><div class="gauge-scale">'+gaugeHtml+'</div></div>'+'<div class="form-footer"><button class="btn btn-outline" onclick="showView(\'list\')">Cancel</button><button class="btn btn-primary" onclick="doSaveMap()">💾 Save to Drive</button></div>';
 }
 
 function shCard(s,i,editable){ var tObj=ITYPES.filter(function(t){return t.c===s.type;})[0]||{}; var aObj=ATT.filter(function(e){return e.v==s.attitude;})[0]; var aLabel=aObj?aObj.l:'—'; var aColor=s.attitude>0?'color:var(--positive)':s.attitude<0?'color:var(--negative)':'color:#555'; var pObj=PART.filter(function(p){return p.c===s.partnership;})[0]; var pLabel=pObj?pObj.c+' — '+pObj.l:'—'; var pColor=s.partnership==='P'?'color:var(--negative)':s.partnership==='EC'?'color:var(--warn)':s.partnership==='G'?'color:var(--positive)':'color:var(--teal)'; return '<div class="sh-card"><div class="sh-hdr"><div><div style="font-weight:600;font-size:15px">'+esc(s.name||'Unnamed')+'</div><div style="font-size:12px;color:var(--ink-light);margin-top:2px">'+esc(s.role||'')+'</div></div><div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap"><span class="type-badge type-'+(s.type||'E')+'">'+(s.type||'?')+' — '+esc(tObj.l||'')+'</span>'+(editable?'<button class="btn btn-outline btn-sm" onclick="openSM('+i+')">Edit</button><button class="del-btn" onclick="remSH('+i+')">🗑</button>':'')+' </div></div><div class="sh-body"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;font-size:13px"><div><div style="font-size:10px;font-weight:600;text-transform:uppercase;color:var(--ink-light);margin-bottom:3px">Attitude</div><div style="font-weight:600;'+aColor+'">'+aLabel+(aObj?' ('+(aObj.v>0?'+':'')+aObj.v+')':'')+'</div></div><div><div style="font-size:10px;font-weight:600;text-transform:uppercase;color:var(--ink-light);margin-bottom:3px">Partnership</div><div style="font-weight:600;'+pColor+'">'+pLabel+'</div></div><div><div style="font-size:10px;font-weight:600;text-transform:uppercase;color:var(--ink-light);margin-bottom:3px">Missing Info</div><div style="font-weight:600;'+(!s.missing?'color:var(--positive)':'color:var(--warn)')+'">'+esc(s.missing||'None')+'</div></div></div>'+(s.winResult?'<div style="font-size:12px;background:var(--bg);padding:8px 10px;border-radius:6px"><strong>Personal win result:</strong> '+esc(s.winResult)+'</div>':'')+(s.orgResult?'<div style="font-size:12px;background:var(--bg);padding:8px 10px;border-radius:6px"><strong>Org result:</strong> '+esc(s.orgResult)+'</div>':'')+'</div></div>'; }
@@ -614,9 +606,41 @@ function renderSHForm(){
   var partHtml=PART.map(function(p){var sel=tmp.partnership===p.c;var bg=sel?'background:'+p.col+';color:#fff;border-color:'+p.col:p.c==='P'?'background:#fff5f5;color:var(--negative)':p.c==='EC'?'background:#fffbf0;color:var(--warn)':p.c==='G'?'background:#f0fdf4;color:var(--positive)':'background:#f0f8fb;color:var(--teal)';return '<button class="par-btn'+(sel?' ps':'')+'" style="'+bg+'" onclick="setTP(\''+p.c+'\')"><span class="pcode">'+p.c+'</span><span class="pname">'+p.l+'</span></button>';}).join('');
   var selAtt=ATT.filter(function(e){return e.v==tmp.attitude;})[0];
   var selPart=PART.filter(function(p){return p.c===tmp.partnership;})[0];
-  return '<div style="display:grid;gap:16px">'+'<div class="field-row" style="margin-bottom:0"><div class="field"><label>FULL NAME <span class="req">*</span></label><input type="text" placeholder="First Last" value="'+esc(tmp.name)+'" oninput="tmp.name=this.value"></div><div class="field"><label>JOB TITLE / ROLE</label><input type="text" placeholder="e.g. CFO, HR Director" value="'+esc(tmp.role)+'" oninput="tmp.role=this.value"></div></div>'+'<div class="field"><label>BUYING INFLUENCE TYPE</label><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+typeHtml+'</div></div>'+'<hr class="mdiv">'+'<div><span class="blk-label">PARTNERSHIP LEVEL — Quality of your business relationship</span><div class="legend-strip"><span class="lchip lc-g">G = Growth: Developing positively — active investment in relationship</span><span class="lchip lc-s">S = Stable: Neutral — no particular issues or growth</span><span class="lchip lc-p">P = Problematic: Active issues or barriers undermining the relationship</span><span class="lchip lc-ec">EC = Excess Confidence: Overconfidence — risk of complacency on either side</span></div><div class="part-wrap"><div class="part-scale">'+partHtml+'</div><div style="margin-top:8px;font-size:12px;color:var(--ink-light);font-style:italic">'+(selPart?selPart.d:'Select a partnership level above')+'</div></div></div>'+'<hr class="mdiv">'+'<div><span class="blk-label">ATTITUDE — How this person feels about this deal</span><div class="legend-strip"><span class="lchip lc-p">Negative (-4 to -1) = Opposed / Resistant</span><span class="lchip lc-g">Positive (+1 to +4) = Accepting / Supportive</span></div><div class="att-scale">'+attHtml+'</div>'+(selAtt?'<div style="margin-top:7px;font-size:12px;color:var(--ink-light);font-style:italic">Selected: <strong>'+selAtt.l+'</strong></div>':'')+' </div>'+'<hr class="mdiv">'+'<div class="field"><label>WHAT\'S IN IT FOR THIS PERSON? (Personal Win Result)</label><textarea placeholder="What does this person personally gain — career, recognition, avoiding blame…" oninput="tmp.winResult=this.value" style="min-height:60px">'+esc(tmp.winResult)+'</textarea></div>'+'<div class="field"><label>WHAT\'S IN IT FOR THEM INSIDE THE COMPANY? (Org Result)</label><textarea placeholder="What business/organisational results do they need to demonstrate?" oninput="tmp.orgResult=this.value" style="min-height:60px">'+esc(tmp.orgResult)+'</textarea></div>'+'<div class="field"><label>WHAT\'S MISSING?</label><input type="text" placeholder="What don\'t you yet know or need to get from/about this person?" value="'+esc(tmp.missing)+'" oninput="tmp.missing=this.value"></div>'+'</div>';
+  return '<div style="display:grid;gap:16px">' +
+    '<div class="field-row" style="margin-bottom:0">' +
+      '<div class="field"><label>FULL NAME <span class="req">*</span></label><input type="text" placeholder="First Last" value="'+esc(tmp.name)+'" oninput="tmp.name=this.value"></div>' +
+      '<div class="field"><label>JOB TITLE / ROLE</label><input type="text" placeholder="e.g. CFO, HR Director" value="'+esc(tmp.role)+'" oninput="tmp.role=this.value"></div>' +
+    '</div>' +
+    '<div class="field"><label>BUYING INFLUENCE TYPE</label><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+typeHtml+'</div></div>' +
+    '<hr class="mdiv">' +
+    '<div>' +
+      '<span class="blk-label">PARTNERSHIP LEVEL — Quality of your business relationship</span>' +
+      '<div class="legend-strip">' +
+        '<span class="lchip lc-g">G = Growth: Developing positively — active investment in relationship</span>' +
+        '<span class="lchip lc-s">S = Stable: Neutral — no particular issues or growth</span>' +
+        '<span class="lchip lc-p">P = Problematic: Active issues or barriers undermining the relationship</span>' +
+        '<span class="lchip lc-ec">EC = Excess Confidence: Overconfidence — risk of complacency on either side</span>' +
+      '</div>' +
+      '<div class="part-wrap"><div class="part-scale">'+partHtml+'</div>' +
+      '<div style="margin-top:8px;font-size:12px;color:var(--ink-light);font-style:italic">'+(selPart?selPart.d:'Select a partnership level above')+'</div></div>' +
+    '</div>' +
+    '<hr class="mdiv">' +
+    '<div>' +
+      '<span class="blk-label">ATTITUDE — How this person feels about this deal</span>' +
+      '<div class="legend-strip">' +
+        '<span class="lchip lc-p">Negative (-4 to -1) = Opposed / Resistant</span>' +
+        '<span class="lchip lc-g">Positive (+1 to +4) = Accepting / Supportive</span>' +
+      '</div>' +
+      '<div class="att-scale">'+attHtml+'</div>' +
+      (selAtt?'<div style="margin-top:7px;font-size:12px;color:var(--ink-light);font-style:italic">Selected: <strong>'+selAtt.l+'</strong></div>':'') +
+    '</div>' +
+    '<hr class="mdiv">' +
+    '<div class="field"><label>WHAT\'S IN IT FOR THIS PERSON? (Personal Win Result)</label><textarea placeholder="What does this person personally gain — career, recognition, avoiding blame…" oninput="tmp.winResult=this.value" style="min-height:60px">'+esc(tmp.winResult)+'</textarea></div>' +
+    '<div class="field"><label>WHAT\'S IN IT FOR THEM INSIDE THE COMPANY? (Org Result)</label><textarea placeholder="What business/organisational results do they need to demonstrate?" oninput="tmp.orgResult=this.value" style="min-height:60px">'+esc(tmp.orgResult)+'</textarea></div>' +
+    '<div class="field"><label>WHAT\'S MISSING?</label><input type="text" placeholder="What don\'t you yet know or need to get from/about this person?" value="'+esc(tmp.missing)+'" oninput="tmp.missing=this.value"></div>' +
+    '</div>';
 }
-  function setTA(v){tmp.attitude=(tmp.attitude==v?'':v);document.getElementById('mBody').innerHTML=renderSHForm();}
+function setTA(v){tmp.attitude=(tmp.attitude==v?'':v);document.getElementById('mBody').innerHTML=renderSHForm();}
 function setTP(c){tmp.partnership=(tmp.partnership===c?'':c);document.getElementById('mBody').innerHTML=renderSHForm();}
 function setTT(c){tmp.type=c;document.getElementById('mBody').innerHTML=renderSHForm();}
 </script>
