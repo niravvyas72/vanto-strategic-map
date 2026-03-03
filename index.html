@@ -386,12 +386,50 @@ function renderDashboard(){
   var avgP=total?Math.round(all.reduce(function(s,m){return s+calcPct(m);},0)/total):0;
   var filtLabels={all:'All Deals',red:'Needs Attention',alert:'Has Alerts',closing:'Closing in 30 Days'};
   var filtBtns=Object.keys(filtLabels).map(function(f){return '<button class="filt-btn'+(chFilter===f?' on':'')+'" onclick="setCHF(\''+f+'\')">'+filtLabels[f]+'</button>';}).join('');
-  var rows=filtered.map(function(m){var p=calcPct(m),pColor=p>=80?'var(--positive)':p>=50?'var(--warn)':'var(--negative)';var readLabel=(m.readiness!==null&&m.readiness!==undefined)?GAUGE[m.readiness]:'—';var hasAlert=m.alerts&&m.alerts.length>0;return '<div class="ch-row" onclick="showView(\'detail\',\''+m.id+'\')">'+'<div><div class="ch-primary">'+esc(m.client||'Unnamed')+'</div><div class="ch-sub">'+esc(m.title||'No title')+'</div></div>'+'<div><div style="font-size:13px;font-weight:500">'+esc(m.accountable||'—')+'</div><div class="ch-sub">'+(m.owner?m.owner.split('@')[0]:'')+' </div></div>'+'<div><div style="font-size:13px">'+(m.byWhen?fmtDate(m.byWhen):'—')+'</div>'+(m.byWhen?'<div class="ch-sub">'+daysUntil(m.byWhen)+'</div>':'')+'</div>'+'<div><div style="font-size:13px;font-weight:700;color:'+pColor+'">'+p+'%</div><div class="prog-mini"><div class="prog-mini-fill'+(p>=80?' gd':'')+'" style="width:'+p+'%"></div></div></div>'+'<div style="font-size:12px">'+(hasAlert?'<span style="color:var(--warn)">⚠ '+m.alerts.length+' alert'+(m.alerts.length>1?'s':'')+'</span>':'<span style="color:var(--positive)">✓ Clear</span>')+'</div>'+'<div style="font-size:12px;color:var(--ink-light)">'+readLabel+'</div></div>';}).join('')||'<div style="padding:30px 20px;text-align:center;color:var(--ink-light)">No deals match this filter</div>';
+  var rows=filtered.map(function(m){
+  var p=calcPct(m),pColor=p>=80?'var(--positive)':p>=50?'var(--warn)':'var(--negative)';
+  var readLabel=(m.readiness!==null&&m.readiness!==undefined)?GAUGE[m.readiness]:'\u2014';
+  var dealAlerts=m.alerts&&m.alerts.length?m.alerts:[];
+  var shWithAlerts=(m.stakeholders||[]).filter(function(s){return s.stakeholderAlerts&&s.stakeholderAlerts.length;});
+  var totalAlerts=dealAlerts.length+shWithAlerts.reduce(function(sum,s){return sum+s.stakeholderAlerts.length;},0);
+  var hasAlert=totalAlerts>0;
+  var pid='ap_'+m.id;
+  var alertBadge=hasAlert
+    ?'<span style="color:var(--warn);cursor:pointer;font-weight:600" onclick="event.stopPropagation();toggleAlertPanel(\'' +pid+ '\')">\u26a0 '+totalAlerts+' alert'+(totalAlerts>1?'s':'')+' \u25be</span>'
+    :'<span style="color:var(--positive)">\u2713 Clear</span>';
+  var panelRows='';
+  if(dealAlerts.length){
+    panelRows+='<div style="margin-bottom:10px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--warn);margin-bottom:6px">Deal-Level Alerts</div><div style="display:flex;gap:5px;flex-wrap:wrap">';
+    dealAlerts.forEach(function(a){panelRows+='<span style="background:#fef3d8;color:var(--warn);border:1px solid #f5d88a;border-radius:6px;padding:3px 9px;font-size:12px;font-weight:600">'+esc(a)+'</span>';});
+    panelRows+='</div>';
+    if(m.alertNotes)panelRows+='<div style="font-size:12px;color:var(--ink-light);font-style:italic;margin-top:6px;padding:6px 10px;background:#fff;border-radius:6px;border:1px solid #f5d88a">'+esc(m.alertNotes)+'</div>';
+    panelRows+='</div>';
+  }
+  shWithAlerts.forEach(function(s){
+    panelRows+='<div style="margin-bottom:8px"><div style="font-size:12px;font-weight:600;color:var(--negative);margin-bottom:4px">\ud83d\udc64 '+esc(s.name||'Unnamed')+'</div><div style="display:flex;gap:5px;flex-wrap:wrap">';
+    s.stakeholderAlerts.forEach(function(a){panelRows+='<span style="background:#fde8e7;color:var(--negative);border:1px solid #f5c6c4;border-radius:6px;padding:3px 9px;font-size:12px;font-weight:600">'+esc(a)+'</span>';});
+    panelRows+='</div>';
+    if(s.alertNotes)panelRows+='<div style="font-size:12px;color:var(--ink-light);font-style:italic;margin-top:4px;padding:6px 10px;background:#fff;border-radius:6px;border:1px solid #f5c6c4">'+esc(s.alertNotes)+'</div>';
+    panelRows+='</div>';
+  });
+  var panel='<div id="'+pid+'" style="display:none;padding:14px 18px;background:#fffbf0;border-top:1px solid #f5d88a">'+panelRows+'<div style="margin-top:8px"><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();showView(\'detail\',\''+m.id+'\')">Open Deal \u2192</button></div></div>';
+  return '<div style="border-bottom:1px solid var(--rule)">'
+    +'<div class="ch-row" style="border-bottom:none" onclick="showView(\'detail\',\''+m.id+'\')">'+
+    '<div><div class="ch-primary">'+esc(m.client||'Unnamed')+'</div><div class="ch-sub">'+esc(m.title||'No title')+'</div></div>'+
+    '<div><div style="font-size:13px;font-weight:500">'+esc(m.accountable||'\u2014')+'</div><div class="ch-sub">'+(m.owner?m.owner.split('@')[0]:'')+' </div></div>'+
+    '<div><div style="font-size:13px">'+(m.byWhen?fmtDate(m.byWhen):'\u2014')+'</div>'+(m.byWhen?'<div class="ch-sub">'+daysUntil(m.byWhen)+'</div>':'')+'</div>'+
+    '<div><div style="font-size:13px;font-weight:700;color:'+pColor+'">'+p+'%</div><div class="prog-mini"><div class="prog-mini-fill'+(p>=80?' gd':'')+'" style="width:'+p+'%"></div></div></div>'+
+    '<div style="font-size:12px">'+alertBadge+'</div>'+
+    '<div style="font-size:12px;color:var(--ink-light)">'+readLabel+'</div>'+
+    '</div>'+panel+
+    '</div>';
+}).join('')||'<div style="padding:30px 20px;text-align:center;color:var(--ink-light)">No deals match this filter</div>';
   return '<div class="ch-banner"><h2>🇮🇳 India Dashboard</h2><p>All active strategic maps · '+total+' total deal'+(total!==1?'s':'')+'</p></div>'+'<div class="ch-stats"><div class="ch-stat"><div class="num">'+total+'</div><div class="lbl">Total Active Deals</div></div><div class="ch-stat s-good"><div class="num">'+avgP+'%</div><div class="lbl">Avg Readiness</div></div><div class="ch-stat s-danger"><div class="num">'+atRisk+'</div><div class="lbl">Needs Attention</div></div><div class="ch-stat s-warn"><div class="num">'+closing+'</div><div class="lbl">Closing in 30 Days</div></div></div>'+'<div class="ch-filters">'+filtBtns+'</div><div class="ch-table"><div class="ch-thead"><div>Client / Deal</div><div>Accountable</div><div>Close By</div><div>Readiness</div><div>Alerts</div><div>Rep Feeling</div></div>'+rows+'</div>';
 }
 function setCHF(f){chFilter=f;render();}
+function toggleAlertPanel(id){var el=document.getElementById(id);if(el)el.style.display=el.style.display==='none'?'block':'none';}
 
-function startNewMap(){form={id:Date.now().toString(),title:'',client:'',accountable:'',outcome:'',urgentCase:'',byWhen:'',stakeholders:[],actions:[{text:'',who:'',when:''}],readiness:null,alerts:[],owner:currentUser?currentUser.email:'',ownerName:currentUser?currentUser.name:'',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};view='new';activeId=null;render();window.scrollTo({top:0,behavior:'smooth'});}
+function startNewMap(){form={id:Date.now().toString(),title:'',client:'',accountable:'',outcome:'',urgentCase:'',byWhen:'',stakeholders:[],actions:[{text:'',who:'',when:''}],readiness:null,alerts:[],alertNotes:'',owner:currentUser?currentUser.email:'',ownerName:currentUser?currentUser.name:'',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};view='new';activeId=null;render();window.scrollTo({top:0,behavior:'smooth'});}
 
 function renderForm(){
   var m=form,mis=calcMissing(m);
@@ -408,7 +446,7 @@ function renderForm(){
     '<div class="field"><label>SPECIFIC OUTCOME <span class="req">*</span></label><textarea placeholder="Action verb + Measurable Output + Timeframe…" oninput="form.outcome=this.value">'+esc(m.outcome)+'</textarea><div class="hint">Format: Action verb + Measurable Output + Timeframe</div></div></div>'+
     '<div class="form-card"><div class="sec-hdr"><h2>Prospect Stakeholders</h2><span class="badge">'+(m.stakeholders||[]).length+' added</span></div><div class="sec-body"><p class="text-muted" style="margin-bottom:12px">Map every person who influences this deal.</p><div class="sh-list">'+shCards+'</div><button class="add-btn" onclick="openSM()"><span style="font-size:18px">+</span> Add Stakeholder</button></div></div>'+
     '<div class="form-card"><div class="sec-hdr"><h2>Strategic Actions</h2><span class="badge">'+(m.actions||[]).length+' action'+((m.actions||[]).length!==1?'s':'')+'</span></div><div class="sec-body"><p class="text-muted" style="margin-bottom:12px">Prioritised actions to advance this deal.</p><div class="act-list">'+actHtml+'</div><button class="add-btn" onclick="addAction()"><span style="font-size:18px">+</span> Add Action</button></div></div>'+
-    '<div class="form-card"><div class="sec-hdr"><h2>Alerts</h2>'+(m.alerts&&m.alerts.length?'<span class="badge">'+m.alerts.length+' active</span>':'')+' </div><div class="sec-body"><p class="text-muted" style="margin-bottom:12px">Flag conditions that could jeopardise this deal.</p><div class="alert-grid">'+alertHtml+'</div></div></div>'+
+    '<div class="form-card"><div class="sec-hdr"><h2>Deal-Level Alerts</h2>'+(m.alerts&&m.alerts.length?'<span class="badge">'+m.alerts.length+' active</span>':'')+' </div><div class="sec-body"><p class="text-muted" style="margin-bottom:12px">Flag conditions affecting this deal overall.</p><div class="alert-grid">'+alertHtml+'</div><div class="field" style="margin-top:14px"><label>Any other alerts or context</label><textarea placeholder="Add any other deal-level risks or context…" oninput="form.alertNotes=this.value" style="min-height:60px">'+esc(m.alertNotes||'')+'</textarea></div></div></div>'+
     '<div class="gauge-sec"><h3>Your Readiness Level</h3><div class="gauge-sub">How do you honestly feel about this deal right now?</div><div class="gauge-scale">'+gaugeHtml+'</div></div>'+
     '<div class="form-footer"><button class="btn btn-outline" onclick="showView(\'list\')">Cancel</button><button class="btn btn-primary" onclick="doSaveMap()">💾 Save to Drive</button></div>';
 }
@@ -453,7 +491,7 @@ function delMap(id){if(!confirm('Delete this strategic map? This cannot be undon
 
 function openSM(idx){
   editIdx=(idx!==undefined)?idx:null;
-  tmp=(idx!==undefined)?JSON.parse(JSON.stringify(form.stakeholders[idx])):{name:'',role:'',type:'E',attitude:'',partnershipLevel:'',winResult:'',orgResult:'',missing:''};
+  tmp=(idx!==undefined)?JSON.parse(JSON.stringify(form.stakeholders[idx])):{name:'',role:'',type:'E',attitude:'',partnershipLevel:'',winResult:'',orgResult:'',missing:'',stakeholderAlerts:[],alertNotes:''};
   document.getElementById('mTitle').textContent=(idx!==undefined)?'Edit Stakeholder':'Add Stakeholder';
   document.getElementById('mBody').innerHTML=renderSHForm();
   document.getElementById('sOverlay').classList.add('open');
@@ -486,6 +524,7 @@ function renderSHForm(){
     return '<button class="att-btn" style="'+(sel?selStyle:base)+'" onclick="setTP('+p.v+')" title="'+p.l+'"><span class="num">'+(p.v>0?'+':'')+p.v+'</span><span style="font-size:8px">'+p.s+'</span></button>';
   }).join('');
 
+  var shAlertHtml=ALERTS.map(function(a,ai){var on=tmp.stakeholderAlerts&&tmp.stakeholderAlerts.indexOf(a)!==-1;return '<div class="alert-item'+(on?' ach':'')+' sh-al" data-al="'+ai+'" onclick="togSHAlertIdx(this,'+ai+')">'+'<div class="chk">'+(on?'&#10003;':'')+'</div><span>'+esc(a)+'</span></div>';}).join('');
   var selAtt=ATT.filter(function(a){return a.c===tmp.attitude;})[0];
   var selPart=PART.filter(function(p){return p.v==tmp.partnershipLevel;})[0];
 
@@ -518,12 +557,21 @@ function renderSHForm(){
       (selPart?'<div style="margin-top:7px;font-size:12px;color:var(--ink-light);font-style:italic">Selected: <strong>'+selPart.l+'</strong></div>':'') +
     '</div>' +
     '<hr class="mdiv">' +
+    '<div>' +
+      '<span class="blk-label">ALERTS FOR THIS STAKEHOLDER</span>' +
+      '<div class="alert-grid">' + shAlertHtml + '</div>' +
+      '<div class="field" style="margin-top:10px"><label>Alert notes</label><textarea placeholder="Note specific risks or concerns about this person…" oninput="tmp.alertNotes=this.value" style="min-height:50px">' + esc(tmp.alertNotes||'') + '</textarea></div>' +
+    '</div>' +
+    '<hr class="mdiv">' +
+    '<hr class="mdiv">' +
+    '<div><span class="blk-label">ALERTS FOR THIS STAKEHOLDER</span><div class="alert-grid">'+shAlertHtml+'</div><div class="field" style="margin-top:10px"><label>Alert notes for this person</label><textarea placeholder="Note specific risks or concerns…" oninput="tmp.alertNotes=this.value" style="min-height:50px">'+esc(tmp.alertNotes||'')+'</textarea></div></div>' +
     '<div class="field"><label>WHAT\'S IN IT FOR THIS PERSON? (Personal Win Result)</label><textarea placeholder="What does this person personally gain — career, recognition, avoiding blame…" oninput="tmp.winResult=this.value" style="min-height:60px">'+esc(tmp.winResult)+'</textarea></div>' +
     '<div class="field"><label>WHAT\'S IN IT FOR THEM INSIDE THE COMPANY? (Org Result)</label><textarea placeholder="What business/organisational results do they need to demonstrate?" oninput="tmp.orgResult=this.value" style="min-height:60px">'+esc(tmp.orgResult)+'</textarea></div>' +
     '<div class="field"><label>WHAT\'S MISSING?</label><input type="text" placeholder="What don\'t you yet know or need to get from/about this person?" value="'+esc(tmp.missing)+'" oninput="tmp.missing=this.value"></div>' +
     '</div>';
 }
 
+function togSHAlertIdx(el,ai){if(!tmp.stakeholderAlerts)tmp.stakeholderAlerts=[];var a=ALERTS[ai];var i=tmp.stakeholderAlerts.indexOf(a);i>=0?tmp.stakeholderAlerts.splice(i,1):tmp.stakeholderAlerts.push(a);document.getElementById('mBody').innerHTML=renderSHForm();}
 function setTA(c){tmp.attitude=(tmp.attitude===c?'':c);document.getElementById('mBody').innerHTML=renderSHForm();}
 function setTP(v){tmp.partnershipLevel=(tmp.partnershipLevel==v?'':v);document.getElementById('mBody').innerHTML=renderSHForm();}
 function setTT(c){tmp.type=c;document.getElementById('mBody').innerHTML=renderSHForm();}
