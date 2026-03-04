@@ -480,12 +480,12 @@ function renderDetail(){
     '<div class="detail-strip"><div style="font-weight:600;margin-bottom:10px">Alerts</div><div style="display:flex;gap:8px;flex-wrap:wrap">'+alertHtml+'</div></div>';
 }
 
-function setReadiness(i){form.readiness=form.readiness===i?null:i;}
-function togAlert(a){if(!form.alerts)form.alerts=[];var i=form.alerts.indexOf(a);i>=0?form.alerts.splice(i,1):form.alerts.push(a);}
-function addAction(){form.actions.push({text:'',who:'',when:''});}
-function remAction(i){form.actions.splice(i,1);}
-function remSH(i){form.stakeholders.splice(i,1);}
-function doSaveMap(){var m=JSON.parse(JSON.stringify(form));if(!m.client.trim()){showToast('Client name is required','te');return;}if(!m.outcome.trim()){showToast('Specific outcome is required','te');return;}m.updatedAt=new Date().toISOString();var idx=-1;for(var i=0;i<maps.length;i++){if(maps[i].id===m.id){idx=i;break;}}if(idx>=0)maps[idx]=m;else maps.push(m);form=m;showView('detail',m.id);saveMapToDrive(m);}
+function setReadiness(i){form.readiness=form.readiness===i?null:i;document.querySelectorAll('.g-btn').forEach(function(b,j){form.readiness===j?b.classList.add('gsel'):b.classList.remove('gsel');});}
+function togAlert(a){if(!form.alerts)form.alerts=[];var i=form.alerts.indexOf(a);i>=0?form.alerts.splice(i,1):form.alerts.push(a);document.querySelectorAll('.alert-item').forEach(function(el){if(el.textContent.includes(a)){el.classList.toggle('ach');el.querySelector('.chk').textContent=el.classList.contains('ach')?'✓':'';}});}
+function addAction(){form.actions.push({text:'',who:'',when:''});var i=form.actions.length-1;var html='<div class="act-row"><div class="act-num">'+(i+1)+'</div><div class="act-fields"><div class="field"><input type="text" placeholder="Describe the strategic action\u2026" oninput="form.actions['+i+'].text=this.value"></div><div class="act-meta"><div class="field"><input type="text" placeholder="Responsible person" oninput="form.actions['+i+'].who=this.value"></div><div class="field"><input type="date" oninput="form.actions['+i+'].when=this.value"></div></div></div><button class="del-btn" onclick="remAction('+i+')">🗑</button></div>';var c=document.querySelector('.act-list');if(c)c.innerHTML+=html;}
+function remAction(i){form.actions.splice(i,1);var html=(form.actions||[]).map(function(a,j){return '<div class="act-row"><div class="act-num">'+(j+1)+'</div><div class="act-fields"><div class="field"><input type="text" placeholder="Describe the strategic action\u2026" value="'+esc(a.text)+'" oninput="form.actions['+j+'].text=this.value"></div><div class="act-meta"><div class="field"><input type="text" placeholder="Responsible person" value="'+esc(a.who)+'" oninput="form.actions['+j+'].who=this.value"></div><div class="field"><input type="date" value="'+esc(a.when)+'" oninput="form.actions['+j+'].when=this.value"></div></div></div><button class="del-btn" onclick="remAction('+j+')">🗑</button></div>';}).join('');var c=document.querySelector('.act-list');if(c)c.innerHTML=html;}
+function remSH(i){form.stakeholders.splice(i,1);var cards=(form.stakeholders||[]).map(function(s,j){return shCard(s,j,true);}).join('');var c=document.querySelector('.sh-list');if(c)c.innerHTML=cards;}
+function doSaveMap(){var m=JSON.parse(JSON.stringify(form));if(!m.client||!m.client.trim()){showToast('Client name is required','te');return;}if(!m.outcome||!m.outcome.trim()){showToast('Specific outcome is required','te');return;}m.updatedAt=new Date().toISOString();var idx=-1;for(var i=0;i<maps.length;i++){if(maps[i].id===m.id){idx=i;break;}}if(idx>=0)maps[idx]=m;else maps.push(m);form=m;showView('detail',m.id);saveMapToDrive(m);}
 function editMap(id){for(var i=0;i<maps.length;i++){if(maps[i].id===id){form=JSON.parse(JSON.stringify(maps[i]));break;}}view='new';render();window.scrollTo({top:0,behavior:'smooth'});}
 function delMap(id){if(!confirm('Delete this strategic map? This cannot be undone.'))return;maps=maps.filter(function(x){return x.id!==id;});deleteMapFromDrive(id);showToast('Map deleted');showView('list');}
 
@@ -497,7 +497,7 @@ function openSM(idx){
   document.getElementById('sOverlay').classList.add('open');
 }
 function closeSM(){document.getElementById('sOverlay').classList.remove('open');tmp={};}
-function saveSH(){if(!tmp.name||!tmp.name.trim()){showToast('Name is required','te');return;}var copy=JSON.parse(JSON.stringify(tmp));if(editIdx!==null&&editIdx>=0)form.stakeholders[editIdx]=copy;else form.stakeholders.push(copy);closeSM();}
+function saveSH(){if(!tmp.name||!tmp.name.trim()){showToast('Name is required','te');return;}var copy=JSON.parse(JSON.stringify(tmp));if(editIdx!==null&&editIdx>=0)form.stakeholders[editIdx]=copy;else form.stakeholders.push(copy);closeSM();var cards=(form.stakeholders||[]).map(function(s,j){return shCard(s,j,true);}).join('');var c=document.querySelector('.sh-list');if(c)c.innerHTML=cards;}
 
 function renderSHForm(){
   var typeHtml=ITYPES.map(function(t){
