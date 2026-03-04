@@ -3,66 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OAuth Dashboard</title>
+    <title>Vanto Strategic Map</title>
     <style>
-        body { font-family: Arial, sans-serif; }
-        #dashboard { display: none; }
-        h1 { color: #333; }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+        #dashboard { display: none; } /* Hide dashboard initially */
     </style>
 </head>
 <body>
-    <h1>OAuth Authentication</h1>
-    <button id="loginBtn">Login with Google</button>
+    <h1>Vanto Strategic Map</h1>
+    <button id="signInButton">Sign in with Google</button>
     <div id="dashboard">
-        <h2>Welcome to the Dashboard</h2>
-        <div id="userInfo"></div>
+        <h2>Dashboard</h2>
+        <p id="userInfo"></p>
     </div>
 
     <script>
-        const clientId = 'YOUR_CLIENT_ID'; // Replace with your client ID
-        const redirectUri = 'YOUR_REDIRECT_URI'; // Replace with your redirect URI
-        const authEndpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
-        const tokenEndpoint = 'YOUR_TOKEN_PROXY_URL'; // Replace with your token proxy URL
-        const scope = 'email profile';
+        const clientId = 'YOUR_CLIENT_ID';
+        const redirectUri = 'YOUR_REDIRECT_URI';
+        let codeVerifier;
 
-        document.getElementById('loginBtn').addEventListener('click', () => {
-            const state = Math.random().toString(36).substring(2);
-            const authUrl = `${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;
+        function signIn() {
+            codeVerifier = generateRandomString(128);
+            const codeChallenge = generateCodeChallenge(codeVerifier);
+            const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&code_challenge=${codeChallenge}&code_challenge_method=S256&scope=openid%20email%20profile`;
             window.location.href = authUrl;
-        });
+        }
 
-        const params = new URLSearchParams(window.location.search);
-        if (params.has('code') && params.has('state')) {
-            const code = params.get('code');
-            const state = params.get('state');
-            console.log('Authorization code:', code);
-            // Code exchange with token proxy
-            fetch(tokenEndpoint, {
+        function exchangeCode(code) {
+            const body = new URLSearchParams();
+            body.append('code', code);
+            body.append('client_id', clientId);
+            body.append('redirect_uri', redirectUri);
+            body.append('grant_type', 'authorization_code');
+            body.append('code_verifier', codeVerifier);
+
+            return fetch('https://oauth2.googleapis.com/token', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code: code, state: state })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Token response:', data);
-                sessionStorage.setItem('access_token', data.access_token);
-                fetchUserInfo(data.access_token);
-            })
-            .catch(error => console.error('Error exchanging code:', error));
+                body: body,
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            });
         }
 
-        function fetchUserInfo(token) {
-            fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('User info:', data);
-                document.getElementById('userInfo').innerText = `Hello, ${data.name}`;
-                document.getElementById('dashboard').style.display = 'block';
-            })
-            .catch(error => console.error('Error fetching user info:', error));
+        function fetchUserInfo(accessToken) {
+            return fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
         }
+
+        function finishAuth() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            if (code) {
+                exchangeCode(code)
+                    .then(response => response.json())
+                    .then(data => {
+                        const accessToken = data.access_token;
+                        localStorage.setItem('access_token', accessToken);
+                        return fetchUserInfo(accessToken);
+                    })
+                    .then(userInfo => {
+                        document.getElementById('userInfo').textContent = `Welcome, ${userInfo.name}`;
+                        document.getElementById('dashboard').style.display = 'block';
+                    });
+            }
+        }
+
+        // Utility Functions
+        function generateRandomString(length) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        function generateCodeChallenge(codeVerifier) {
+            return crypto.subtle.digest('SHA-256', new TextEncoder().encode(codeVerifier)).then(buffer => {
+                const hashArray = Array.from(new Uint8Array(buffer));
+                const hashString = hashArray.map(b => String.fromCharCode(b)).join('');
+                return btoa(hashString)
+                    .replace(/=+$/, '')
+                    .replace(/\+/g, '-')
+                    .replace(/\//g, '_');
+            });
+        }
+
+        document.getElementById('signInButton').addEventListener('click', signIn);
+
+        // Handle authentication on page load
+        window.onload = function() {
+            finishAuth();
+        };
     </script>
 </body>
 </html>
