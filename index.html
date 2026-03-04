@@ -1,150 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vanto Group — Strategic Map</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-:root{
-  --ink:#0f1117;--ink-light:#4a4f5e;--rule:#e2e4ea;
-  --bg:#f5f5f2;--card:#fff;--accent:#c8382b;--accent-dark:#9e2820;
-  --positive:#2a7d4f;--negative:#c8382b;--warn:#e67e22;--teal:#1a6b7a;
-  --gold:#c8972b;--radius:12px;
-  --shadow:0 2px 12px rgba(15,17,23,.07);
-  --shadow-lg:0 8px 40px rgba(15,17,23,.12);
-}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
-header{background:var(--ink);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,.3);flex-wrap:wrap;gap:8px}
-.logo{font-family:'DM Serif Display',serif;font-size:19px;flex-shrink:0}
-.logo .ac{color:var(--accent)}
-.logo .sub{color:rgba(255,255,255,.38);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:300;margin-left:8px}
-.hdr-right{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 14px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .18s;-webkit-appearance:none}
-.btn-ghost{background:rgba(255,255,255,.1);color:#fff}
-.btn-ghost:hover{background:rgba(255,255,255,.2)}
-.btn-primary{background:var(--accent);color:#fff}
-.btn-primary:hover{background:var(--accent-dark)}
-.btn-outline{background:transparent;color:var(--ink);border:1.5px solid var(--rule)}
-.btn-outline:hover{background:var(--bg)}
-.btn-gold{background:var(--gold);color:#fff}
-.btn-danger{background:transparent;color:var(--negative);border:1.5px solid #f5c6c4}
-.btn-sm{padding:5px 11px;font-size:12px}
-.user-chip{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border-radius:20px;padding:4px 12px 4px 4px;font-size:12px;font-weight:500;color:#fff}
-.user-av{width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
-.user-av img{width:24px;height:24px;display:block}
-.sync-dot{width:8px;height:8px;border-radius:50%;background:#4CAF50;flex-shrink:0}
-.sync-dot.syncing{background:var(--gold);animation:pulse 1s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.main{max-width:960px;margin:0 auto;padding:26px 16px 80px}
-.auth-wrap{display:flex;align-items:center;justify-content:center;min-height:75vh;padding:20px}
-.auth-card{background:var(--card);border-radius:16px;padding:36px 40px;max-width:400px;width:100%;box-shadow:var(--shadow-lg);text-align:center}
-.auth-logo{font-family:'DM Serif Display',serif;font-size:30px;margin-bottom:20px}
-.auth-logo span{color:var(--accent)}
-.auth-card h2{font-size:20px;font-weight:600;margin-bottom:8px}
-.auth-card p{color:var(--ink-light);font-size:14px;line-height:1.6;margin-bottom:24px}
-.google-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:13px;border-radius:10px;border:1.5px solid var(--rule);background:#fff;font-size:15px;font-weight:600;cursor:pointer;transition:all .18s;color:var(--ink);-webkit-appearance:none;text-decoration:none}
-.google-btn:hover{background:var(--bg);border-color:#aaa;box-shadow:var(--shadow)}
-.load-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;color:var(--ink-light)}
-.spinner{width:38px;height:38px;border:3px solid var(--rule);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.empty-state{text-align:center;padding:60px 20px;color:var(--ink-light)}
-.empty-state .icon{font-size:44px;margin-bottom:14px}
-.empty-state h3{font-size:20px;font-weight:600;color:var(--ink);margin-bottom:8px}
-.toast{position:fixed;bottom:20px;right:20px;z-index:999;background:var(--ink);color:#fff;padding:12px 18px;border-radius:10px;font-size:14px;font-weight:500;box-shadow:var(--shadow-lg);transform:translateY(120px);opacity:0;transition:all .3s;max-width:300px}
-.toast.show{transform:translateY(0);opacity:1}
-.toast.ts{border-left:4px solid var(--positive)}
-.toast.te{border-left:4px solid var(--negative)}
-.toast.tw{border-left:4px solid var(--gold)}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #dashboard { display: none; }
+        h1 { color: #333; }
+    </style>
 </head>
 <body>
-<header>
-  <div class="logo">Vanto <span class="ac">Group</span><span class="sub">Strategic Map</span></div>
-  <div class="hdr-right" id="hdrRight"></div>
-</header>
-<div class="main" id="app">
-  <div class="load-wrap"><div class="spinner"></div><div>Starting up…</div></div>
-</div>
-<div class="toast" id="toast"></div>
-<script>
-var CLIENT_ID    = '569636278695-rf4palrjq7mtbkdn3socphh5h1dftrd5.apps.googleusercontent.com';
-var FOLDER_ID    = '1WKkJpprL2GENFHOux7Whut7LuRy_im8V';
-var REDIRECT     = location.origin + location.pathname;
-var TOKEN_PROXY  = 'https://vanto-auth-proxy.vercel.app/api/token';
-var SCOPES       = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email';
-var INDEX_FILE   = 'vanto_sm_index.json';
-var INDIA_ADMINS = ["nirav.hiral@gmail.com"];
+    <h1>OAuth Authentication</h1>
+    <button id="loginBtn">Login with Google</button>
+    <div id="dashboard">
+        <h2>Welcome to the Dashboard</h2>
+        <div id="userInfo"></div>
+    </div>
 
-var token=null,currentUser=null,maps=[],driveIndex={},indexFileId=null;
-var view='loading',activeId=null,form={},tmp={},editIdx=null,chFilter='all',syncing=false;
+    <script>
+        const clientId = 'YOUR_CLIENT_ID'; // Replace with your client ID
+        const redirectUri = 'YOUR_REDIRECT_URI'; // Replace with your redirect URI
+        const authEndpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
+        const tokenEndpoint = 'YOUR_TOKEN_PROXY_URL'; // Replace with your token proxy URL
+        const scope = 'email profile';
 
-function base64url(buf){return btoa(String.fromCharCode.apply(null,new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');}
-function genVerifier(){var arr=new Uint8Array(32);crypto.getRandomValues(arr);return base64url(arr);}
-function genChallenge(v){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(v)).then(function(b){return base64url(b);});}
-function parseQuery(s){var r={};s.replace(/^\?/,'').split('&').forEach(function(p){if(!p)return;var k=p.split('=');r[decodeURIComponent(k[0])]=decodeURIComponent(k[1]||'');});return r;}
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            const state = Math.random().toString(36).substring(2);
+            const authUrl = `${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;
+            window.location.href = authUrl;
+        });
 
-window.addEventListener('load',function(){
-  var p=parseQuery(location.search);
-  if(p.code&&p.state){
-    var ss=sessionStorage.getItem('vsm_state'),sv=sessionStorage.getItem('vsm_verifier');
-    history.replaceState(null,'',location.pathname);
-    if(p.state!==ss||!sv){showToast('Auth state mismatch','te');showAuthScreen();return;}
-    showLoading('Completing sign in…');exchangeCode(p.code,sv);return;
-  }
-  var tok=sessionStorage.getItem('vsm_tok'),usr=sessionStorage.getItem('vsm_usr');
-  if(tok&&usr){try{token=tok;currentUser=JSON.parse(usr);finishAuth();return;}catch(e){sessionStorage.clear();}}
-  if(tok){token=tok;showLoading('Signing in…');fetchUserInfo().then(finishAuth).catch(function(){sessionStorage.clear();showAuthScreen();});return;}
-  showAuthScreen();
-});
+        const params = new URLSearchParams(window.location.search);
+        if (params.has('code') && params.has('state')) {
+            const code = params.get('code');
+            const state = params.get('state');
+            console.log('Authorization code:', code);
+            // Code exchange with token proxy
+            fetch(tokenEndpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: code, state: state })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Token response:', data);
+                sessionStorage.setItem('access_token', data.access_token);
+                fetchUserInfo(data.access_token);
+            })
+            .catch(error => console.error('Error exchanging code:', error));
+        }
 
-function signIn(){
-  var ver=genVerifier(),st=genVerifier();
-  sessionStorage.setItem('vsm_verifier',ver);sessionStorage.setItem('vsm_state',st);
-  genChallenge(ver).then(function(ch){
-    location.href='https://accounts.google.com/o/oauth2/v2/auth?'+
-      ['client_id='+encodeURIComponent(CLIENT_ID),'redirect_uri='+encodeURIComponent(REDIRECT),
-       'response_type=code','scope='+encodeURIComponent(SCOPES),'code_challenge='+ch,
-       'code_challenge_method=S256','state='+st,'access_type=online','prompt=select_account'].join('&');
-  });
-}
-
-function exchangeCode(code,ver){
-  fetch(TOKEN_PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:code,code_verifier:ver,redirect_uri:REDIRECT})})
-  .then(function(r){return r.json();}).then(function(d){
-    if(!d.access_token){showToast('Sign-in failed: '+(d.error_description||d.error||'unknown'),'te');showAuthScreen();return;}
-    token=d.access_token;sessionStorage.setItem('vsm_tok',token);
-    sessionStorage.removeItem('vsm_verifier');sessionStorage.removeItem('vsm_state');
-    fetchUserInfo().then(finishAuth).catch(function(){sessionStorage.clear();showAuthScreen();});
-  }).catch(function(){showToast('Sign-in failed — check connection','te');showAuthScreen();});
-}
-
-function signOut(){sessionStorage.clear();token=null;currentUser=null;maps=[];driveIndex={};renderHeader();showAuthScreen();}
-function fetchUserInfo(){
-  return fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{'Authorization':'Bearer '+token}})
-  .then(function(r){if(!r.ok)throw new Error();return r.json();})
-  .then(function(i){currentUser={email:i.email||'',name:i.name||i.email||'User',picture:i.picture||''};sessionStorage.setItem('vsm_usr',JSON.stringify(currentUser));});
-}
-function finishAuth(){renderHeader();showLoading('Loading maps from Google Drive…');loadAllMaps().then(function(){view='list';render();});}
-
-function showAuthScreen(){
-  view='auth';
-  document.getElementById('app').innerHTML='<div class="auth-wrap"><div class="auth-card"><div class="auth-logo">Vanto <span>Group</span></div><h2>Strategic Map</h2><p>Sign in with your Google account to access the team\'s strategic maps. All data saves securely to Google Drive.</p><button class="google-btn" onclick="signIn()"><svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>Sign in with Google</button></div></div>';
-}
-function showLoading(msg){document.getElementById('app').innerHTML='<div class="load-wrap"><div class="spinner"></div><div>'+(msg||'Loading…')+'</div></div>';}
-
-function renderHeader(){
-  var el=document.getElementById('hdrRight');if(!currentUser){el.innerHTML='';return;}
-  var fname=(currentUser.name||currentUser.email).split(' ')[0];
-  el.innerHTML='<div class="sync-dot" id="syncDot"></div><button class="btn btn-ghost btn-sm" onclick="signOut()">Sign out</button>';
-}
-function setSyncing(v){syncing=v;var d=document.getElementById('syncDot');if(d)d.className='sync-dot'+(v?' syncing':'');}
-
-function showToast(msg,type){var t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+(type||'ts');setTimeout(function(){t.classList.remove('show');},3500);}
-function render(){renderHeader();document.getElementById('app').innerHTML='<div style="padding:20px"><h2>Welcome '+currentUser.email+'</h2><p>Strategic Map application is loading...</p><button class="btn btn-primary" onclick="signOut()">Sign Out</button></div>';}
-
-loadAllMaps();
-</script>
+        function fetchUserInfo(token) {
+            fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('User info:', data);
+                document.getElementById('userInfo').innerText = `Hello, ${data.name}`;
+                document.getElementById('dashboard').style.display = 'block';
+            })
+            .catch(error => console.error('Error fetching user info:', error));
+        }
+    </script>
 </body>
 </html>
