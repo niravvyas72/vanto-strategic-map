@@ -3,44 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In</title>
+    <title>Vanto Strategic Map</title>
     <style>
-        body { font-family: Arial, sans-serif; }
-        .btn-signin {
-            display: inline-block;
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            color: #333;
+        }
+        .google-signin {
             padding: 10px 20px;
-            background-color: #4CAF50; /* Green */
-            color: white;
             border: none;
             border-radius: 5px;
-            cursor: pointer;
+            background-color: #db4437;
+            color: white;
             font-size: 16px;
-            margin-top: 20px;
-        }
-        .btn-signin:hover {
-            background-color: #45a049;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <h1>Welcome to the App</h1>
-    <button class="btn-signin" id="signin-button">Sign In with Google</button>
-
-    <script>
-        // OAuth 2.0 PKCE Flow
-        const clientId = 'YOUR_CLIENT_ID';
-        const redirectUri = 'YOUR_REDIRECT_URI';
-        const scope = 'openid email profile';
-        const codeChallenge = ''; // Implement code challenge generation
-
-        document.getElementById('signin-button').addEventListener('click', () => {
-            const authEndpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
-            const url = `${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=code&code_challenge=${codeChallenge}&code_challenge_method=S256`;
-            window.location.href = url;
-        });
-
-        // Handle redirection and token exchange
-        // Add code here to handle the code returned from redirection, exchange it for tokens and fetch user info
-    </script>
+    <h1>Vanto Strategic Map</h1>
+    <button class="google-signin" onclick="alert('Sign in with Google clicked!')">Sign in with Google</button>
 </body>
 </html>
