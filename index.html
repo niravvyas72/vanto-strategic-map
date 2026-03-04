@@ -1,1 +1,9 @@
-<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Strategic Map</title>\n    <script>\n        function doSaveMap() {\n            // Updated validation logic to check for required fields\n            const requiredFields = [\n                'field1', 'field2', 'field3' // specify your required fields here\n            ];\n            let isValid = true;\n            requiredFields.forEach(field => {\n                if (document.getElementById(field).value === '') {\n                    isValid = false;\n                }\n            });\n            if (!isValid) {\n                alert('Please fill in all required fields.');\n                return false;\n            }\n            // proceed with saving logic\n        }\n\n        function updateMissingBar() {\n            const counterElement = document.getElementById('liveCounter');\n            // Your logic to update the counter live\n            setInterval(() => {\n                let currentCount = parseInt(counterElement.innerText);\n                counterElement.innerText = currentCount + 1; // Example increment\n            }, 1000); // updates every 1 second\n        }\n\n        window.onload = updateMissingBar;\n    <\/script>\n</head>\n<body>\n    <h1>Welcome to the Strategic Map</h1>\n    <div id=\"liveCounter\">0</div>\n    <button onclick=\"doSaveMap()\">Save Map</button>\n</body>\n</html>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Original Title</title>
+</head>
+<body>
+    <h1>Welcome to the Original Index</h1>
+</body>
+</html>
