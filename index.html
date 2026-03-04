@@ -1,68 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vanto Strategic Map</title>
-    <script>
-        // PKCE implementation
-        const clientId = '569636278695-rf4palrjq7mtbkdn3socphh5h1dftrd5.apps.googleusercontent.com';
-        const redirectUri = 'https://niravvyas72.github.io/vanto-strategic-map/';
-
-        function generateCodeChallenge() {
-            const codeVerifier = generateRandomString();
-            const codeChallenge = btoa(String.fromCharCode.apply(null, new Uint8Array(window.crypto.getRandomValues(new Uint8Array(32)))));
-            // Store verifier in session storage
-            sessionStorage.setItem('codeVerifier', codeVerifier);
-            return codeChallenge;
-        }
-
-        function generateRandomString(length = 128) {
-            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
-            let randomString = '';
-            for (let i = 0; i < length; i++) {
-                randomString += characters.charAt(Math.floor(Math.random() * characters.length));
-            }
-            return randomString;
-        }
-
-        function signIn() {
-            const codeChallenge = generateCodeChallenge();
-            const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=openid email profile&code_challenge=${codeChallenge}&code_challenge_method=S256`;
-            window.location.href = authUrl;
-        }
-
-        async function handleRedirect() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code');
-            if (code) {
-                const codeVerifier = sessionStorage.getItem('codeVerifier');
-                // Exchange authorization code for access token
-                const tokenResponse = await fetch('https://vanto-auth-proxy.vercel.app/api/token', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        code,
-                        redirect_uri: redirectUri,
-                        client_id: clientId,
-                        code_verifier: codeVerifier
-                    })
-                });
-                const tokenData = await tokenResponse.json();
-                // Now you can use access token to fetch user info
-                const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                    headers: {'Authorization': `Bearer ${tokenData.access_token}`}
-                });
-                const userInfo = await userInfoResponse.json();
-                console.log('User Info:', userInfo);
-            }
-        }
-
-        window.onload = handleRedirect;
-    </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vanto Strategic Map</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;margin:0;background:#f0f0f0}
+    h1{color:#333;margin:0 0 16px}
+    button{background:#db4437;color:#fff;padding:12px 18px;border:0;border-radius:6px;font-size:16px;font-weight:600;cursor:pointer}
+    button:disabled{opacity:.7;cursor:not-allowed}
+    #status{margin-top:16px;color:#333;max-width:520px;text-align:center}
+    code{background:#fff;padding:2px 6px;border-radius:4px}
+  </style>
 </head>
 <body>
-    <h1>Vanto Strategic Map</h1>
-    <button onclick="signIn()">Sign in with Google</button>
+  <h1>Vanto Strategic Map</h1>
+  <button id="signin">Sign in with Google</button>
+  <div id="status"></div>
+
+  <script>
+    const CLIENT_ID = '569636278695-rf4palrjq7mtbkdn3socphh5h1dftrd5.apps.googleusercontent.com';
+    const REDIRECT_URI = 'https://niravvyas72.github.io/vanto-strategic-map/';
+    const TOKEN_PROXY = 'https://vanto-auth-proxy.vercel.app/api/token';
+    const SCOPES = [
+      'openid',
+      'email',
+      'profile',
+      'https://www.googleapis.com/auth/drive.file',
+      'https://www.googleapis.com/auth/userinfo.profile',
+      'https://www.googleapis.com/auth/userinfo.email'
+    ].join(' ');
+
+    const $status = document.getElementById('status');
+    const $btn = document.getElementById('signin');
+
+    function base64urlFromBytes(bytes){
+      let binary='';
+      for (const b of bytes) binary += String.fromCharCode(b);
+      return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+    }
+
+    function randomString(len){
+      const bytes = new Uint8Array(len);
+      crypto.getRandomValues(bytes);
+      return base64urlFromBytes(bytes);
+    }
+
+    async function pkceChallengeFromVerifier(verifier){
+      const data = new TextEncoder().encode(verifier);
+      const digest = await crypto.subtle.digest('SHA-256', data);
+      return base64urlFromBytes(new Uint8Array(digest));
+    }
+
+    function qs(name){
+      return new URLSearchParams(location.search).get(name);
+    }
+
+    async function startSignIn(){
+      $btn.disabled = true;
+      $status.textContent = 'Redirecting to Google sign-in…';
+
+      const verifier = randomString(32);
+      const state = randomString(16);
+      sessionStorage.setItem('vsm_verifier', verifier);
+      sessionStorage.setItem('vsm_state', state);
+
+      const challenge = await pkceChallengeFromVerifier(verifier);
+
+      const params = new URLSearchParams({
+        client_id: CLIENT_ID,
+        redirect_uri: REDIRECT_URI,
+        response_type: 'code',
+        scope: SCOPES,
+        code_challenge: challenge,
+        code_challenge_method: 'S256',
+        state,
+        prompt: 'select_account'
+      });
+
+      location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
+    }
+
+    async function handleCallback(){
+      const code = qs('code');
+      const state = qs('state');
+      if (!code) return;
+
+      $btn.disabled = true;
+      $status.textContent = 'Completing sign-in…';
+
+      const expectedState = sessionStorage.getItem('vsm_state');
+      const verifier = sessionStorage.getItem('vsm_verifier');
+
+      if (!verifier || !expectedState || state !== expectedState){
+        $status.innerHTML = 'Auth failed: state mismatch. Please try again.';
+        $btn.disabled = false;
+        return;
+      }
+
+      history.replaceState({}, document.title, REDIRECT_URI);
+
+      const resp = await fetch(TOKEN_PROXY, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ code, code_verifier: verifier, redirect_uri: REDIRECT_URI })
+      });
+      const data = await resp.json();
+      if (!data.access_token){
+        $status.textContent = 'Token exchange failed: ' + (data.error_description || data.error || 'unknown');
+        $btn.disabled = false;
+        return;
+      }
+
+      const userResp = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: 'Bearer ' + data.access_token }
+      });
+      const user = await userResp.json();
+
+      $status.innerHTML = `Signed in as <b>${user.email || '(unknown email)'}</b>.`;
+    }
+
+    $btn.addEventListener('click', startSignIn);
+    handleCallback();
+  </script>
 </body>
 </html>
