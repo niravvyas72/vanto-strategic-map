@@ -268,21 +268,29 @@ var chFilter='all', syncing=false;
 // ═══════════════════════════════════
 // BOOT — PKCE authorization code flow
 // ═══════════════════════════════════
-function base64url(buf) {
-  return btoa(String.fromCharCode.apply(null, new Uint8Array(buf)))
-    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+<script>
+function base64urlFromBytes(bytes){
+  var binary='';
+  for (var i=0;i<bytes.length;i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 }
-function genVerifier() {
-  var arr = new Uint8Array(32);
+
+function base64url(buf){
+  return base64urlFromBytes(new Uint8Array(buf));
+}
+
+function genVerifier(){
+  var arr=new Uint8Array(32);
   crypto.getRandomValues(arr);
-  return base64url(arr);
+  return base64urlFromBytes(arr);
 }
-function genChallenge(verifier) {
-  var enc = new TextEncoder().encode(verifier);
-  return crypto.subtle.digest('SHA-256', enc).then(function(buf) {
-    return base64url(buf);
-  });
+
+function genChallenge(verifier){
+  return crypto.subtle
+    .digest('SHA-256', new TextEncoder().encode(verifier))
+    .then(function(hash){ return base64urlFromBytes(new Uint8Array(hash)); });
 }
+</script>
 function parseQuery(str) {
   var result = {};
   str.replace(/^\?/,'').split('&').forEach(function(part) {
